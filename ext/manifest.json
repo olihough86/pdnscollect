@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+    "name": "DNS Collector",
+    "version": "1.0",
+    "description": "Collects DNS requests and sends them to an API",
+    "permissions": ["webRequest", "webRequestBlocking", "<all_urls>"],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": true
+    },
+    "icons": {
+      "48": "icon.png"
+    },
+    "browser_action": {
+      "default_icon": "icon.png"
+    }
+  }
+  
