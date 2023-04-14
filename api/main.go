@@ -13,9 +13,9 @@ import (
 )
 
 type DNSData struct {
-	ID        string `json:"id"`
 	IPAddress string `json:"ip_address"`
 	Domain    string `json:"domain"`
+	Timestamp string `json:"timestamp"`
 }
 
 var esClient *elasticsearch.Client
@@ -35,7 +35,7 @@ func submitDNSData(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&newDNSData)
 
 	// Log received DNS data to the terminal
-	log.Printf("Received DNS data: ID=%s, IP=%s, Domain=%s", newDNSData.ID, newDNSData.IPAddress, newDNSData.Domain)
+	log.Printf("Received DNS data: IP=%s, Domain=%s,Timestamp=%s", newDNSData.IPAddress, newDNSData.Domain, newDNSData.Timestamp)
 
 	// Convert the DNS data struct to JSON
 	jsonData, err := json.Marshal(newDNSData)
@@ -48,7 +48,6 @@ func submitDNSData(w http.ResponseWriter, r *http.Request) {
 	// Index the DNS data in Elasticsearch
 	req := esapi.IndexRequest{
 		Index:      "dnsdata",
-		DocumentID: newDNSData.ID,
 		Body:       strings.NewReader(string(jsonData)),
 		Refresh:    "true",
 	}
