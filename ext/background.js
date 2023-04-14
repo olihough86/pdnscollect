@@ -30,15 +30,16 @@ function sendDNSDataToAPI(dnsData) {
     function (details) {
       chrome.storage.sync.get('keywords', function (data) {
         const domain = new URL(details.url).hostname;
+        const timestamp = new Date(details.timeStamp).toISOString();
         const keywords = (data.keywords || '').split(',').map(k => k.trim()).filter(k => k);
   
         if (!uniqueHosts.has(domain) && shouldCollect(domain, keywords)) {
           uniqueHosts.add(domain);
   
           const dnsData = {
-            id: details.requestId,
             ip_address: details.ip,
-            domain: domain
+            domain: domain,
+            timestamp: timestamp
           };
   
           sendDNSDataToAPI(dnsData);
