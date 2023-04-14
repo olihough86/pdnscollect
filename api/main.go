@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"strings"
 
@@ -15,6 +16,7 @@ import (
 type DNSData struct {
 	IPAddress string `json:"ip_address"`
 	Domain    string `json:"domain"`
+	CNAME     string `json:"cname,omitempty"`
 	Timestamp string `json:"timestamp"`
 }
 
@@ -34,8 +36,14 @@ func submitDNSData(w http.ResponseWriter, r *http.Request) {
 	var newDNSData DNSData
 	json.NewDecoder(r.Body).Decode(&newDNSData)
 
+	// Check if the domain has a CNAME record
+	cname, err := net.LookupCNAME(newDNSData.Domain)
+	if err == nil {
+		newDNSData.CNAME = cname
+	}
+
 	// Log received DNS data to the terminal
-	log.Printf("Received DNS data: IP=%s, Domain=%s,Timestamp=%s", newDNSData.IPAddress, newDNSData.Domain, newDNSData.Timestamp)
+	log.Printf("Received DNS data: IP=%s, Domain=%s, CNAME=%s, Timestamp=%s", newDNSData.IPAddress, newDNSData.Domain, newDNSData.CNAME, newDNSData.Timestamp)
 
 	// Convert the DNS data struct to JSON
 	jsonData, err := json.Marshal(newDNSData)
