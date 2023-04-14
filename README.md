@@ -7,3 +7,5 @@ This is not a finished working project you can clone and run, if you don't know 
 think of a very small number, it's that version.
 
 If you think it's a cool concept though... I WANT TO HEAR FROM YOU go mad, create PRs, I'll be on this all day at least until something that works pops out of the other end. Consider Elastic for storage, I like it.
+
+elastic branch: API will log everythong to a local elastic search instance, bind elastic to 127.0.0.1 and turn off all the xpack garbage or improve main.go to support it
