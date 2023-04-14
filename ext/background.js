@@ -16,24 +16,34 @@ function sendDNSDataToAPI(dnsData) {
   // A Set to store unique hosts
   const uniqueHosts = new Set();
   
+  function shouldCollect(domain, keywords) {
+    for (const keyword of keywords) {
+      if (domain.includes(keyword)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  
   // Listener for DNS requests
   chrome.webRequest.onCompleted.addListener(
     function (details) {
-      const domain = new URL(details.url).hostname;
+      chrome.storage.sync.get('keywords', function (data) {
+        const domain = new URL(details.url).hostname;
+        const keywords = (data.keywords || '').split(',').map(k => k.trim()).filter(k => k);
   
-      // Check if the domain is already processed
-      if (!uniqueHosts.has(domain)) {
-        uniqueHosts.add(domain);
+        if (!uniqueHosts.has(domain) && shouldCollect(domain, keywords)) {
+          uniqueHosts.add(domain);
   
-        const dnsData = {
-          id: details.requestId,
-          ip_address: details.ip,
-          domain: domain
-        };
+          const dnsData = {
+            id: details.requestId,
+            ip_address: details.ip,
+            domain: domain
+          };
   
-        sendDNSDataToAPI(dnsData);
-      }
+          sendDNSDataToAPI(dnsData);
+        }
+      });
     },
     { urls: ['<all_urls>'] }
-  );
-  
+  );  

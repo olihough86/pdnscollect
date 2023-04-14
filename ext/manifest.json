@@ -3,7 +3,7 @@
     "name": "DNS Collector",
     "version": "1.0",
     "description": "Collects DNS requests and sends them to an API",
-    "permissions": ["webRequest", "webRequestBlocking", "<all_urls>"],
+    "permissions": ["webRequest", "webRequestBlocking", "<all_urls>", "storage"],
     "background": {
       "scripts": ["background.js"],
       "persistent": true
@@ -13,6 +13,6 @@
     },
     "browser_action": {
       "default_icon": "icon.png"
-    }
-  }
-  
+    },
+    "options_page": "options.html"
+  }  
