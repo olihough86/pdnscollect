@@ -24,5 +24,3 @@ Between coffee number 1 and coffee number 3, these things happened:
 3. A UTC timestamp is passed with each log. This is Elastic compatible, yay! Select it when creating your index pattern. There is no longer an ID field passed; Elastic will create one by magic.
 
 Yes, this whole stack will run on a Raspberry Pi 4, just barely. RAM is your problem.
-
-[testing cli]
