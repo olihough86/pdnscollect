@@ -37,7 +37,7 @@ function sendDNSDataToAPI(dnsData) {
           uniqueHosts.add(domain);
   
           const dnsData = {
-            ip_address: details.ip,
+            ip: details.ip,
             domain: domain,
             timestamp: timestamp
           };
