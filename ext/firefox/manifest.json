@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "dns.gives",
+  "version": "1.0",
+  "description": "Anonymously collect DNS request data from the browser",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "dns-gives@yourdomain.com",
+      "strict_min_version": "53.0"
+    }
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>",
+    "storage"
+  ],
+  "background": {
+    "scripts": ["browser-polyfill.js", "background.js"]
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "icons": {
+    "48": "icons/icon-48.png"
+  }
+}
+
