@@ -16,6 +16,10 @@ I foresee a bug that may arise after being open for a long time. The array of al
 
 ## Updates from the front line
 
+### 2023-04-17 13:52
+
+I broke it and then fixed it *shrug* YOLO dev is best dev, there is FireFox now, I'm fixing Chrome.
+
 ### 2023.04-16 04:00
 
 I'm trying to fix the messy go layout, there is now a proper moduel refrenced to gihub.com/olihoughio/pdnscollect/api not sure if it's broken or not if so just figure it out or fix it and make a PR, it's not really needed but standards innit, sorting this out will save dep headaches in the future.
