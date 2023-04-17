@@ -14,7 +14,39 @@ Avoid adding too much logic or processing in the extension; it needs to be light
 
 I foresee a bug that may arise after being open for a long time. The array of already submitted hosts used to avoid too many repeat submissions will grow very large; this needs to be redone.
 
+## This is not an install guide
+
+have the lastest 8.x elastic on your machine (use ssh tunnels if it's elsewhere) disable xpack, ssl etc
+bind elastic to 127.0.0.1:9200
+clone repo
+install golang
+install the required go deps (look in main.go)
+build and run or just run main.go it is now listening on 127.0.0.1:8080
+
+load correct ext from ext/
+
+browse interwebs
+
+data is in elastic, you should also see output from main.go
+
+Don't for the love of all that is pure expose the API to the Internet it will be bad news bears.
+
 ## Updates from the front line
+
+### 2023-04-17 16:00
+
+
+Chrome support
+Firefox support
+
+filtering should work on both, though Chrome is getting a rewrite soon to match up with Firefox, Firefox already drops everything that resolves to 127.0.0.1 or has the hostname localhost by dfault, (yes I know, IPv6, you'll have to wait)
+
+ip_address has been renamed to ip on both ext and api, whoops that's how I broke everything
+
+loading an unpacked ext in Firefox means going to about:debugging loading the ext from there by selecting the manifest.json 
+you will find debugging messages in there too by hitting Inspect.
+
+over on the API side, it does a quick check to see if a host has a CNAME if it does it will update the CNAME field if not then it will match the domain, this is fine.
 
 ### 2023-04-17 13:52
 
