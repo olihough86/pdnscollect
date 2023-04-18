@@ -21,7 +21,7 @@ bind elastic to 127.0.0.1:9200
 clone repo
 install golang
 install the required go deps (look in main.go)
-build and run or just run main.go it is now listening on 127.0.0.1:8080
+build and run or just run main.go it is now listening on 127.0.0.1 (you need to edit main.go and have it listen on your local network for the android app)
 
 load correct ext from ext/
 
