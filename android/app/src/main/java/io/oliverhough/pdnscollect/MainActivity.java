@@ -1,5 +1,6 @@
 package io.oliverhough.pdnscollect;
 
+import io.oliverhough.pdnscollect.DnsCaptureVpnService;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.VpnService;
