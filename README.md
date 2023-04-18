@@ -1,10 +1,10 @@
 # pdnscollect
 
-Browser extension and local listener PoC for collecting your own DNS data while browsing
+Browser extension, Android app and API endpoint PoC for collecting your own DNS data while browsing and logging it to Elastic
 
 ## Listen
 
-This is not a finished working project you can clone and run. If you don't know how to load a dev Chrome extension or if you know nothing about Go or how to post data to an API, this is not for you.
+This is not a finished working project you can clone and run. If you don't know how to load a dev extension, run a unpackaged Android app or if you know nothing about Go or how to post data to an API, this is not for you.
 
 Think of a very small number; it's that version. Security? lol
 
@@ -32,6 +32,10 @@ data is in elastic, you should also see output from main.go
 Don't for the love of all that is pure expose the API to the Internet it will be bad news bears.
 
 ## Updates from the front line
+
+### 2023-04-18 16:37
+
+Merged Android branch into main it's a horror show but it works on my emulator
 
 ### 2023-04-18 15:55
 
