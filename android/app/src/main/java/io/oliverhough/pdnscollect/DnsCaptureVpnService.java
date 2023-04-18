@@ -21,6 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+@SuppressWarnings("ALL")
 public class DnsCaptureVpnService extends VpnService {
 
     private static final String API_URL = "http://192.168.1.140:8080/api/dnsdata";
@@ -49,14 +50,11 @@ public class DnsCaptureVpnService extends VpnService {
         vpnInterface = builder.establish();
         httpClient = new OkHttpClient();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    captureDnsPackets(); // Removed the 'socket' parameter
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            try {
+                captureDnsPackets(); // Removed the 'socket' parameter
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
 
@@ -81,8 +79,6 @@ public class DnsCaptureVpnService extends VpnService {
     private void processDnsPacket(byte[] packetData, int length) {
         //String packetType;
         //String transportProtocol;
-        int srcPort = 0;
-        int dstPort = 0;
         byte[] udpPayload = new byte[0];
 
         // Check if it's an IPv4 packet (starts with 0x45)
@@ -103,12 +99,10 @@ public class DnsCaptureVpnService extends VpnService {
                 //Log.d("DNSData", "Transport protocol: " + transportProtocol);
                 //Log.d("DNSData", "Source port: " + srcPort + ", Destination port: " + dstPort);
                 //Log.d("DNSData", "UDP payload: " + new String(udpPayload));
-            } else {
-                //Log.d("DNSData", "Captured non-UDP packet with length: " + length);
-            }
-        } else {
-            //Log.d("DNSData", "Captured non-IPv4 packet with length: " + length);
-        }
+            }  //Log.d("DNSData", "Captured non-UDP packet with length: " + length);
+
+        }  //Log.d("DNSData", "Captured non-IPv4 packet with length: " + length);
+
 
         // Check if the payload contains a DNS query
         // Check if the payload contains a DNS query
@@ -150,7 +144,7 @@ public class DnsCaptureVpnService extends VpnService {
             if (domainName.charAt(domainName.length() - 1) == '.') {
                 domainName.deleteCharAt(domainName.length() - 1);
             }
-            Log.d("DNSData", "DNS query: " + domainName.toString());
+            Log.d("DNSData", "DNS query: " + domainName);
 
             // Send the domain name and timestamp to the API
             sendDnsData(domainName.toString());
