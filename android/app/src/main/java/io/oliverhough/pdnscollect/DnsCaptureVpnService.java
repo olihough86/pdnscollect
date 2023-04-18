@@ -4,23 +4,25 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.VpnService;
 import android.os.ParcelFileDescriptor;
+import android.system.OsConstants;
 import android.util.Log;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.Formatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
-import android.system.OsConstants;
-
 public class DnsCaptureVpnService extends VpnService {
 
     private static final String API_URL = "http://192.168.1.140:8080/api/dnsdata";
@@ -60,7 +62,6 @@ public class DnsCaptureVpnService extends VpnService {
             }
         }).start();
 
-
         return START_NOT_STICKY;
     }
 
@@ -73,80 +74,98 @@ public class DnsCaptureVpnService extends VpnService {
             int length = inputStream.read(buffer.array());
             if (length > 0) {
                 buffer.limit(length);
+                Log.d("DNSData", "Captured packet with length: " + length); // Add this log statement
                 processDnsPacket(buffer.array(), length); // Removed the 'socket' parameter
             }
         }
     }
 
+    private void processDnsPacket(byte[] packetData, int length) {
+        String packetType;
+        String transportProtocol;
+        int srcPort = 0;
+        int dstPort = 0;
+        byte[] udpPayload = new byte[0];
 
-    private void processDnsPacket(byte[] data, int length) {
-        Log.d("DNSData", "Processing a packet");
-        Log.d("DNSData", "First byte: " + String.format("0x%02X", data[0]));
+        // Check if it's an IPv4 packet (starts with 0x45)
+        if ((packetData[0] & 0xf0) == 0x40) {
+            packetType = "IPv4";
+            // Check if it's a UDP packet (17)
+            if (packetData[9] == 17) {
+                transportProtocol = "UDP";
+                // Extract the UDP payload
+                int udpPayloadOffset = (packetData[0] & 0x0f) * 4 + 20;
+                udpPayload = Arrays.copyOfRange(packetData, udpPayloadOffset, length);
 
-        int version = (data[0] >> 4) & 0xF;
+                // Extract source and destination ports
+                srcPort = ((udpPayload[0] & 0xff) << 8) | (udpPayload[1] & 0xff);
+                dstPort = ((udpPayload[2] & 0xff) << 8) | (udpPayload[3] & 0xff);
 
-        if (version == 4) {
-            processIpv4Packet(data, length);
-        } else if (version == 6) {
-            processIpv6Packet(data, length);
-        } else {
-            Log.d("DNSData", "Not an IPv4 or IPv6 packet");
-        }
-    }
-
-    private void processIpv4Packet(byte[] data, int length) {
-        int headerLength = (data[0] & 0xF) * 4;
-        int protocol = data[9] & 0xFF;
-
-        if (headerLength < 20 || length < headerLength) {
-            Log.d("DNSData", "Not a valid IPv4 packet or invalid length");
-            return;
-        }
-
-        if (protocol == 6 || protocol == 17) { // TCP or UDP
-            int srcPort = ((data[headerLength] & 0xFF) << 8) | (data[headerLength + 1] & 0xFF);
-            int dstPort = ((data[headerLength + 2] & 0xFF) << 8) | (data[headerLength + 3] & 0xFF);
-
-            if (srcPort == 53 || dstPort == 53) {
-                Log.d("DNSData", "IPv4 DNS packet");
+                Log.d("DNSData", "Captured " + packetType + " packet");
+                Log.d("DNSData", "Transport protocol: " + transportProtocol);
+                Log.d("DNSData", "Source port: " + srcPort + ", Destination port: " + dstPort);
+                Log.d("DNSData", "UDP payload: " + new String(udpPayload));
             } else {
-                Log.d("DNSData", "IPv4 Non-DNS packet");
+                Log.d("DNSData", "Captured non-UDP packet with length: " + length);
             }
         } else {
-            Log.d("DNSData", "New Log - IPv6 packet with unsupported protocol: " + protocol);
-        }
-    }
-
-    private void processIpv6Packet(byte[] data, int length) {
-        int headerLength = 40; // IPv6 header is fixed at 40 bytes
-        int protocol = data[6] & 0xFF;
-
-        if (length < headerLength) {
-            Log.d("DNSData", "Not a valid IPv6 packet or invalid length");
-            return;
+            Log.d("DNSData", "Captured non-IPv4 packet with length: " + length);
         }
 
-        if (protocol == 6 || protocol == 17) { // TCP or UDP
-            int srcPort = ((data[headerLength] & 0xFF) << 8) | (data[headerLength + 1] & 0xFF);
-            int dstPort = ((data[headerLength + 2] & 0xFF) << 8) | (data[headerLength + 3] & 0xFF);
+        // Check if the payload contains a DNS query
+        // Check if the payload contains a DNS query
+        String payloadString = new String(udpPayload);
+        Log.d("DNSData", "Payload string: " + payloadString);
 
-            if (srcPort == 53 || dstPort == 53) {
-                Log.d("DNSData", "IPv6 DNS packet");
-            } else {
-                Log.d("DNSData", "IPv6 Non-DNS packet");
+        // Output the payload as a hex dump
+        StringBuilder hexDump = new StringBuilder();
+        Formatter formatter = new Formatter(hexDump);
+        for (byte b : udpPayload) {
+            formatter.format("%02x ", b);
+        }
+        Log.d("DNSData", "Payload hex dump: " + hexDump.toString());
+
+        // Extract the domain name by considering label length
+        StringBuilder domainName = new StringBuilder();
+        int i = 0;
+        while (i < udpPayload.length) {
+            int labelLength = udpPayload[i] & 0xFF;
+            if (labelLength == 0) {
+                break;
             }
-        } else {
-            Log.d("DNSData", "New Log - IPv6 packet with unsupported protocol: " + protocol);
+
+            if (i + labelLength >= udpPayload.length) {
+                break;
+            }
+
+            String label = new String(udpPayload, i + 1, labelLength);
+            domainName.append(label);
+            i += labelLength + 1;
+
+            if (i < udpPayload.length && udpPayload[i] != 0) {
+                domainName.append('.');
+            }
+        }
+
+        if (domainName.length() > 0) {
+            // Remove the trailing dot, if present
+            if (domainName.charAt(domainName.length() - 1) == '.') {
+                domainName.deleteCharAt(domainName.length() - 1);
+            }
+            Log.d("DNSData", "DNS query: " + domainName.toString());
+
+            // Send the domain name and timestamp to the API
+            sendDnsData(domainName.toString());
         }
     }
 
-    private void sendDnsData(String hostAddress, String ip, String domain) {
+    private void sendDnsData(String domain) {
         SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String timestamp = isoFormat.format(new Date());
 
-        String json = String.format("{\"IP\": \"%s\", \"Domain\": \"%s\", \"Timestamp\": \"%s\"}",
-                ip, domain, timestamp);
+        String json = String.format("{\"Domain\": \"%s\", \"Timestamp\": \"%s\"}",
+                domain, timestamp);
         Log.d("DNSData", "Sending DNS data: " + json);
 
         RequestBody requestBody = RequestBody.create(JSON, json);
