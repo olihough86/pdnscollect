@@ -33,8 +33,11 @@ Don't for the love of all that is pure expose the API to the Internet it will be
 
 ## Updates from the front line
 
-### 2023-04-17 16:00
+### 2023-04-18 15:55
 
+After a rather tedious fight with Android, the Android branch is here, a WIP with very hardcoded strings and a bunch of usless boilerplate and WTF stuff, but... it does parse out the hostnames from the mutant Andoid DNS requsts, it does not resolve them so it leaves the IP field blank, I'm working on it. It seems to work with all apps from what I can see, as it routes the device traffic through a local VPN allowing it to capture packets. I have been turning PrivateDNS off in settings, I guess you need to also. Will merge into main once the IP field is sorted.
+
+### 2023-04-17 16:00
 
 Chrome support
 Firefox support
@@ -52,7 +55,7 @@ over on the API side, it does a quick check to see if a host has a CNAME if it d
 
 I broke it and then fixed it *shrug* YOLO dev is best dev, there is FireFox now, I'm fixing Chrome.
 
-### 2023.04-16 04:00
+### 2023-04-16 04:00
 
 I'm trying to fix the messy go layout, there is now a proper moduel refrenced to gihub.com/olihoughio/pdnscollect/api not sure if it's broken or not if so just figure it out or fix it and make a PR, it's not really needed but standards innit, sorting this out will save dep headaches in the future.
 
