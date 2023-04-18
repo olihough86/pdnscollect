@@ -13,10 +13,8 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.Formatter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.TimeZone;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -81,35 +79,35 @@ public class DnsCaptureVpnService extends VpnService {
     }
 
     private void processDnsPacket(byte[] packetData, int length) {
-        String packetType;
-        String transportProtocol;
+        //String packetType;
+        //String transportProtocol;
         int srcPort = 0;
         int dstPort = 0;
         byte[] udpPayload = new byte[0];
 
         // Check if it's an IPv4 packet (starts with 0x45)
         if ((packetData[0] & 0xf0) == 0x40) {
-            packetType = "IPv4";
+            //packetType = "IPv4";
             // Check if it's a UDP packet (17)
             if (packetData[9] == 17) {
-                transportProtocol = "UDP";
+                //transportProtocol = "UDP";
                 // Extract the UDP payload
                 int udpPayloadOffset = (packetData[0] & 0x0f) * 4 + 20;
                 udpPayload = Arrays.copyOfRange(packetData, udpPayloadOffset, length);
 
                 // Extract source and destination ports
-                srcPort = ((udpPayload[0] & 0xff) << 8) | (udpPayload[1] & 0xff);
-                dstPort = ((udpPayload[2] & 0xff) << 8) | (udpPayload[3] & 0xff);
+                //srcPort = ((udpPayload[0] & 0xff) << 8) | (udpPayload[1] & 0xff);
+                //dstPort = ((udpPayload[2] & 0xff) << 8) | (udpPayload[3] & 0xff);
 
-                Log.d("DNSData", "Captured " + packetType + " packet");
-                Log.d("DNSData", "Transport protocol: " + transportProtocol);
-                Log.d("DNSData", "Source port: " + srcPort + ", Destination port: " + dstPort);
-                Log.d("DNSData", "UDP payload: " + new String(udpPayload));
+                //Log.d("DNSData", "Captured " + packetType + " packet");
+                //Log.d("DNSData", "Transport protocol: " + transportProtocol);
+                //Log.d("DNSData", "Source port: " + srcPort + ", Destination port: " + dstPort);
+                //Log.d("DNSData", "UDP payload: " + new String(udpPayload));
             } else {
-                Log.d("DNSData", "Captured non-UDP packet with length: " + length);
+                //Log.d("DNSData", "Captured non-UDP packet with length: " + length);
             }
         } else {
-            Log.d("DNSData", "Captured non-IPv4 packet with length: " + length);
+            //Log.d("DNSData", "Captured non-IPv4 packet with length: " + length);
         }
 
         // Check if the payload contains a DNS query
@@ -123,7 +121,7 @@ public class DnsCaptureVpnService extends VpnService {
         for (byte b : udpPayload) {
             formatter.format("%02x ", b);
         }
-        Log.d("DNSData", "Payload hex dump: " + hexDump.toString());
+        //Log.d("DNSData", "Payload hex dump: " + hexDump.toString());
 
         // Extract the domain name by considering label length
         StringBuilder domainName = new StringBuilder();
