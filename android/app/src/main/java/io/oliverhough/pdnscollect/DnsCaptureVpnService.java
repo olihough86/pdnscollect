@@ -11,10 +11,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.List;
 import java.util.TimeZone;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -24,7 +28,7 @@ import okhttp3.Response;
 @SuppressWarnings("ALL")
 public class DnsCaptureVpnService extends VpnService {
 
-    private static final String API_URL = "http://192.168.1.140:8080/api/dnsdata";
+    private static final String API_URL = "http://192.168.1.140:8080/api/dnsdata"; // YOU NEED TO EDIT THIS
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     private ParcelFileDescriptor vpnInterface;
@@ -59,6 +63,19 @@ public class DnsCaptureVpnService extends VpnService {
         }).start();
 
         return START_NOT_STICKY;
+    }
+
+    private List<String> resolveDomain(String domain) {
+        List<String> ipAddresses = new ArrayList<>();
+        try {
+            InetAddress[] addresses = InetAddress.getAllByName(domain);
+            for (InetAddress address : addresses) {
+                ipAddresses.add(address.getHostAddress());
+            }
+        } catch (UnknownHostException e) {
+            Log.e("DNSData", "Error resolving domain: " + domain, e);
+        }
+        return ipAddresses;
     }
 
     private void captureDnsPackets() throws IOException {
@@ -152,32 +169,41 @@ public class DnsCaptureVpnService extends VpnService {
     }
 
     private void sendDnsData(String domain) {
-        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String timestamp = isoFormat.format(new Date());
+        List<String> resolvedIPs = resolveDomain(domain);
+        if (!resolvedIPs.isEmpty()) {
+            // Get the first IP address
+            String firstIpAddress = resolvedIPs.get(0);
 
-        String json = String.format("{\"Domain\": \"%s\", \"Timestamp\": \"%s\"}",
-                domain, timestamp);
-        Log.d("DNSData", "Sending DNS data: " + json);
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            String timestamp = isoFormat.format(new Date());
 
-        RequestBody requestBody = RequestBody.create(JSON, json);
-        Request request = new Request.Builder()
-                .url(API_URL)
-                .post(requestBody)
-                .build();
+            String json = String.format("{\"IP\": \"%s\", \"Domain\": \"%s\", \"Timestamp\": \"%s\"}",
+                    firstIpAddress, domain, timestamp);
+            Log.d("DNSData", "Sending DNS data: " + json);
 
-        try {
-            Response response = httpClient.newCall(request).execute();
-            if (response.isSuccessful()) {
-                Log.d("DNSData", "DNS data sent successfully");
-            } else {
-                Log.d("DNSData", "Failed to send DNS data: " + response.code() + " " + response.message());
+            RequestBody requestBody = RequestBody.create(JSON, json);
+            Request request = new Request.Builder()
+                    .url(API_URL)
+                    .post(requestBody)
+                    .build();
+
+            try {
+                Response response = httpClient.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    Log.d("DNSData", "DNS data sent successfully");
+                } else {
+                    Log.d("DNSData", "Failed to send DNS data: " + response.code() + " " + response.message());
+                }
+                response.close();
+            } catch (IOException e) {
+                Log.e("DNSData", "Error sending DNS data", e);
             }
-            response.close();
-        } catch (IOException e) {
-            Log.e("DNSData", "Error sending DNS data", e);
+        } else {
+            Log.d("DNSData", "Domain resolution failed: " + domain);
         }
     }
+
 
     @Override
     public void onDestroy() {
