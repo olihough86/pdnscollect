@@ -8,7 +8,7 @@ This is not a finished working project you can clone and run. If you don't know 
 
 Think of a very small number; it's that version. Security? lol
 
-If you think it's a cool concept though... I WANT TO HEAR FROM YOU! Go mad, create PRs. I'll be on this all day at least until something that works pops out of the other end.
+If you think it's a cool concept though... I WANT TO HEAR FROM YOU! Go mad, create PRs.
 
 Avoid adding too much logic or processing in the extension; it needs to be lightweight. The poor thing will have a Tor client stuffed into it soon enough, and that will make it sad. Enrichment should be done on the API side.
 
