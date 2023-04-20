@@ -17,10 +17,15 @@ I foresee a bug that may arise after being open for a long time. The array of al
 ## This is not an install guide
 
 have the lastest 8.x elastic on your machine (use ssh tunnels if it's elsewhere) disable xpack, ssl etc
+
 bind elastic to 127.0.0.1:9200
+
 clone repo
+
 install golang
+
 install the required go deps (look in main.go)
+
 build and run or just run main.go it is now listening on 127.0.0.1 (you need to edit main.go and have it listen on your local network for the android app)
 
 load correct ext from ext/
